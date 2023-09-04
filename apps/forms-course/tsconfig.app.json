@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "types": ["node"]
+  },
+  "include": [
+    "**/*.ts",
+    "../../libs/section1/src/index.ts",
+    "../../libs/section2/src/index.ts",
+
+    "../../libs/section5/src/index.ts",
+
+    "../../libs/section3/src/index.ts",
+
+    "../../libs/section4/src/index.ts",
+
+    "../../libs/section6/src/index.ts"
+  ],
+  "exclude": ["src/test-setup.ts", "**/*.spec.ts"]
+}

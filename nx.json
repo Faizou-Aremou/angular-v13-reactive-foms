@@ -1,0 +1,27 @@
+{
+  "npmScope": "forms-course",
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": "*",
+    "tsconfig.json": "*",
+    "tslint.json": "*",
+    "nx.json": "*"
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/nx-cloud",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "e2e",
+          "buildForProd",
+          "deploy",
+          "ci"
+        ],
+        "accessToken": "Y2YxZGUxMGMtYmExOS00OWYyLWIzZjgtYTM1ZGYxMDgxNjcwfHJlYWQtd3JpdGU="
+      }
+    }
+  }
+}

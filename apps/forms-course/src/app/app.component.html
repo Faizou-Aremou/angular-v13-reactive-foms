@@ -1,0 +1,21 @@
+<mat-toolbar>
+  <h1>Nrwl Forms Course</h1>
+</mat-toolbar>
+<mat-sidenav-container>
+  <mat-sidenav mode="side" [opened]="true" [fixedInViewport]="true">
+    <mat-nav-list>
+      <a
+        mat-list-item
+        *ngFor="let navLink of navLinks"
+        [routerLink]="navLink.path"
+        routerLinkActive="active"
+        ><mat-icon>{{ navLink.icon }}</mat-icon
+        ><span>{{ navLink.text }}</span></a
+      >
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <forms-course-section-shell></forms-course-section-shell>
+  </mat-sidenav-content>
+</mat-sidenav-container>

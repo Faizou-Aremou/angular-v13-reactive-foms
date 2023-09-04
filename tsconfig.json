@@ -1,0 +1,29 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2017", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@forms-course/section1": ["libs/section1/src/index.ts"],
+      "@forms-course/section2": ["libs/section2/src/index.ts"],
+      "@forms-course/ui-common": ["libs/ui-common/src/index.ts"],
+      "@forms-course/section5": ["libs/section5/src/index.ts"],
+      "@forms-course/section3": ["libs/section3/src/index.ts"],
+      "@forms-course/section4": ["libs/section4/src/index.ts"],
+      "@forms-course/section6": ["libs/section6/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
