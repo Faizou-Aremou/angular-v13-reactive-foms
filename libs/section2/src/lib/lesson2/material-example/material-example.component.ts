@@ -4,13 +4,16 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'forms-course-material-example',
   templateUrl: './material-example.component.html',
-  styleUrls: ['./material-example.component.css']
+  styleUrls: ['./material-example.component.css'],
 })
 export class MaterialExampleComponent {
   form = new FormGroup({
-    input: new FormControl('', [Validators.required, Validators.maxLength(10)])
+    input: new FormControl('', [Validators.required, Validators.maxLength(10)]),
   });
 
+  get inputControl() {
+    return this.form.get('input') as FormControl;
+  }
   submit() {
     alert('Submitted!');
   }

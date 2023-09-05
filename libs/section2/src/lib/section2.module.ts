@@ -35,12 +35,12 @@ import { HeroAdderComponent } from './lesson4/hero-adder/hero-adder.component';
     CommonModule,
     UiCommonModule,
     MatCardModule,
-    MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatSnackBarModule,
     FormsModule,
     ReactiveFormsModule,
+    MatFormFieldModule,
     StoreModule.forFeature('hero', heroReducer),
     RouterModule.forChild([
       {
