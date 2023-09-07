@@ -1,15 +1,21 @@
 <form
   [formGroup]="form"
-  class="form-group"
   [ngClass]="{ 'has-error': form.invalid }"
   (submit)="submit()"
 >
-  <div>
+  <div class="form-group">
     <label class="control-label" for="word inputSuccess1"
       >Some Less Than 10-Character Input</label
     >
-    <input id="word" type="text" class="form-control" formControlName="input" />
-    <div *ngIf="form.invalid" class="has-error">
+    <input
+      id="word"
+      type="text"
+      class="form-control"
+      [class.is-invalid]="form.invalid"
+      [class.is-valid]="form.valid"
+      formControlName="input"
+    />
+    <div *ngIf="form.invalid" class="invalid-feedback">
       <div *ngIf="inputControl?.errors?.required">Some input is required.</div>
       <div *ngIf="inputControl?.errors?.maxlength">
         Input must be less than

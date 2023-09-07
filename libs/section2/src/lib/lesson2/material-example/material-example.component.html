@@ -1,14 +1,16 @@
 <form [formGroup]="form" (submit)="submit()">
   <div>
-    <mat-form-field>
+    <mat-form-field  appearance="outline">
       <mat-label>Some Less Than 10-Character Input</mat-label>
       <input matInput id="word" type="text" formControlName="input" />
       <mat-error *ngIf="form.invalid">
-        <div *ngIf="inputControl?.errors?.required">Some input is required.</div>
-        <div *ngIf="inputControl?.errors?.maxlength">
+        <p *ngIf="inputControl?.errors?.required">
+          Some input is required.
+        </p>
+        <p *ngIf="inputControl?.errors?.maxlength as maxlength">
           Input must be less than
-          {{ inputControl.errors.maxlength.requiredLength }} characters.
-        </div>
+          {{ maxlength.requiredLength}} characters.
+        </p>
       </mat-error>
     </mat-form-field>
   </div>
