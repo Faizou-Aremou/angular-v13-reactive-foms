@@ -27,8 +27,7 @@ const heroValidator: ValidatorFn = (control: FormGroup) => {
     },
     0 as number
   );
-  console.log('statsValuesSomme', statsValuesSomme);
-  return statsValuesSomme > 60 ? { maxTotal: statsValuesSomme } : null;
+  return statsValuesSomme > MAX_TOTAL_STATS ? { maxTotal: statsValuesSomme } : null;
 };
 
 const createSingleStatControl = () => new FormControl(0, singleStatValidators);
