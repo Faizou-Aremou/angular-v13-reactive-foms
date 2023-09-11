@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
+  AsyncValidatorFn,
   FormControl,
   FormGroup,
   ValidatorFn,
   Validators
 } from '@angular/forms';
 import { ApiService } from '../../api.service';
+import { UniqueNameValidator } from './unique-name-validator.service';
 
 const TOTAL_NAME_LIMIT = 40;
 
@@ -38,11 +40,11 @@ export class FullNameComponent {
     },
     [fullNameTooLongValidator],
     [
-      // add your async validator here!!!
+      this.uniqueNameValidator.validate.bind(this.uniqueNameValidator)
     ]
   );
 
-  constructor(private api: ApiService) {}
+  constructor(private uniqueNameValidator: UniqueNameValidator) {}
 
   submit() {
     alert(`Submitted with value: ${JSON.stringify(this.form.value, null, 2)}`);
