@@ -19,8 +19,10 @@
     type="submit"
     mat-raised-button
     color="primary"
-    [disabled]="!form.valid"
+    [disabled]="form.invalid"
   >
     Add Hero!
   </button>
 </form>
+<pre>{{form.get('name').errors | json}}</pre>
+<pre>{{form['invalid'] | json}}</pre>

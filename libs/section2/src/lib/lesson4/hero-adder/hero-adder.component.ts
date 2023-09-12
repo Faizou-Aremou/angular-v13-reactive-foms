@@ -5,30 +5,33 @@ import { select, Store } from '@ngrx/store';
 import { take, map } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { createHero } from '../../+state/hero.actions';
+import { NameAlreadyAdded } from './name-already-added.service';
 
 @Component({
   selector: 'forms-course-hero-adder',
   templateUrl: './hero-adder.component.html',
-  styleUrls: ['./hero-adder.component.css']
+  styleUrls: ['./hero-adder.component.css'],
 })
 export class HeroAdderComponent {
   form = new FormGroup({
     name: new FormControl(
       '',
       [Validators.required, Validators.maxLength(16)],
-      [
-        // add your async validator here!
-      ]
-    )
+      [this.nameAlreadyAdded.validate.bind(this.nameAlreadyAdded)]
+    ),
   });
 
-  constructor(private store: Store<any>, private _matSnackBar: MatSnackBar) {}
+  constructor(
+    private store: Store<any>,
+    private _matSnackBar: MatSnackBar,
+    private nameAlreadyAdded: NameAlreadyAdded
+  ) {}
 
   addName() {
     const name = this.form.get('name').value;
     this.store.dispatch(createHero({ name }));
     this._matSnackBar.open(`${name} added to Heroes!`, undefined, {
-      duration: 2000
+      duration: 2000,
     });
     this.form.reset();
   }
