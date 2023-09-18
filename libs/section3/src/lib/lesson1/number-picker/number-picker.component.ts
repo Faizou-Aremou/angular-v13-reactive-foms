@@ -18,27 +18,31 @@ export class NumberPickerComponent implements ControlValueAccessor {
   private _onChange;
   private _onTouched;
 
+
   subtractOne() {
-    // add your implementation here!
+    this.value -= 1;
+    this._onChange(this.value);
   }
 
   addOne() {
-    // add your implementation here!
+    this.value += 1;
+    this._onChange(this.value);
   }
 
-  writeValue(v: number) {
-    // add your implementation here!
+  writeValue(value: number) {
+    this.value = value;
   }
 
   registerOnChange(fn) {
-    // add your implementation here!
+    this._onChange = fn;
   }
 
   registerOnTouched(fn) {
-    // add your implementation here!
+   this._onTouched = fn
   }
 
   blur() {
-    // add your implementation here!
+    this._onTouched()
   }
+
 }
