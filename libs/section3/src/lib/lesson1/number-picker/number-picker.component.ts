@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -9,15 +9,18 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: NumberPickerComponent,
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class NumberPickerComponent implements ControlValueAccessor {
   value: number;
   private _onChange;
   private _onTouched;
-
+  constructor(private cd: ChangeDetectorRef) {}
+  @ViewChild('subtract') subtract;
+  @ViewChild('display') display;
+  @ViewChild('add') add;
 
   subtractOne() {
     this.value -= 1;
@@ -38,11 +41,20 @@ export class NumberPickerComponent implements ControlValueAccessor {
   }
 
   registerOnTouched(fn) {
-   this._onTouched = fn
+    this._onTouched = fn;
   }
 
   blur() {
-    this._onTouched()
+    setTimeout(() => {
+      console.log(document.activeElement);
+      if (
+        document.activeElement !== this.subtract._elementRef.nativeElement &&
+        document.activeElement !== this.add._elementRef.nativeElement &&
+        document.activeElement !== this.display.nativeElement
+      ) {
+        console.log('focusout() called!!');
+        this._onTouched();
+      }
+    }, 0);
   }
-
 }

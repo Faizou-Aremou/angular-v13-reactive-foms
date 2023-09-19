@@ -1,9 +1,9 @@
 <form (focusout)="blur()"  >
-  <button mat-raised-button (click)="subtractOne()">
+  <button mat-raised-button #subtract (click)="subtractOne()">
     -1
   </button>
-  <span tabindex="0">{{ value }}</span>
-  <button mat-raised-button (click)="addOne()">
+  <span tabindex="0" #display>{{ value }}</span>
+  <button mat-raised-button #add (click)="addOne()">
     +1
   </button>
 </form>
