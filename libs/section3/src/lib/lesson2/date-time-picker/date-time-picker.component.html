@@ -1,4 +1,4 @@
-<form>
-  <input type="date" />
-  <input type="time" step="1" />
+<form (focusout)="(blur)" [formGroup]="formGroup">
+  <input type="date" formControlName="date" />
+  <input type="time" step="1" formControlName="time" />
 </form>
