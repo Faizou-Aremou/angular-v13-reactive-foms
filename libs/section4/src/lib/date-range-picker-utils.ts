@@ -1,11 +1,11 @@
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ValidationErrors } from '@angular/forms';
 
 export interface DateRange {
   start: Date;
   end: Date;
 }
 
-const dateRangeValidation = (dateRange: DateRange) => {
+const dateRangeValidation = (dateRange: DateRange): ValidationErrors => {
   const validationErrors = {};
   if (!dateRange.start) {
     validationErrors['invalidStart'] = true;
