@@ -1,4 +1,4 @@
-<form>
+<form [formGroup]="form">
   <mat-card>
     <fieldset>
       <mat-card-title>Party Form</mat-card-title>
@@ -6,8 +6,8 @@
         <div>
           <mat-form-field appearance="outline">
             <mat-label>Party Name</mat-label>
-            <input matInput />
-            <mat-error>
+            <input matInput formControlName="name" />
+            <mat-error *ngIf="nameControl.errors?.required">
               Party Name is Required.
             </mat-error>
           </mat-form-field>
@@ -16,7 +16,7 @@
         <div>
           <mat-form-field>
             <mat-label>Party Size</mat-label>
-            <mat-select>
+            <mat-select formControlName="size">
               <mat-option *ngFor="let size of validPartySizes" [value]="size">{{
                 size
               }}</mat-option>
@@ -25,7 +25,10 @@
         </div>
 
         <div class="hero-container">
-          <!-- <forms-course-hero-form></forms-course-hero-form> -->
+          <forms-course-hero-form
+            *ngFor="let hero of heroesControls.controls; let i = index"
+            [formControl]="hero"
+          ></forms-course-hero-form>
         </div>
       </mat-card-content>
     </fieldset>
