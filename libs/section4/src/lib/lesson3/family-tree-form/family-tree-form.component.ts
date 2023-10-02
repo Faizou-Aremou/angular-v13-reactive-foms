@@ -1,11 +1,18 @@
 import { Component, OnDestroy } from '@angular/core';
 import {
   ControlValueAccessor,
+  FormArray,
+  FormControl,
   FormGroup,
-  NG_VALUE_ACCESSOR
+  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { FamilyTreeModel } from '../../family-tree.utils';
+import { Subject, startWith, takeUntil, tap } from 'rxjs';
+import {
+  FamilyTreeModel,
+  createFamilyTreeControl,
+  createFamilyTreeGroup,
+  updateFamilyTreeFormGroup,
+} from '../../family-tree.utils';
 
 @Component({
   selector: 'forms-course-family-tree-form',
@@ -15,33 +22,55 @@ import { FamilyTreeModel } from '../../family-tree.utils';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: FamilyTreeFormComponent,
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class FamilyTreeFormComponent
-  implements OnDestroy, ControlValueAccessor {
+  implements OnDestroy, ControlValueAccessor
+{
   form: FormGroup;
   private _destroying$ = new Subject<void>();
+  private _touched: any;
+
+  get nameControl() {
+    return this.form.get('name') as FormControl | undefined;
+  }
+  get ageControl() {
+    return this.form.get('age') as FormControl | undefined;
+  }
+  get childrenControl() {
+    return this.form.get('children') as FormArray | undefined;
+  }
 
   writeValue(v: FamilyTreeModel) {
-    // add your own implementation here!
-    // make sure you use and understand the functions in the
-    // family-tree.utils file!!!
+    if (this.form) {
+      updateFamilyTreeFormGroup(this.form, v);
+    } else {
+      this.form = createFamilyTreeGroup(v);
+    }
   }
 
   registerOnChange(fn) {
-    // add your own implmentation here!
+    this.form.valueChanges.pipe(
+      takeUntil(this._destroying$),
+      startWith(this.form.value),
+      tap(fn)
+    ).subscribe();
   }
 
-  registerOnTouched(fn) {}
+  registerOnTouched(fn) {
+    this._touched = fn;
+  }
 
   addChild() {
-    // add your own implementation here!
-    // make sure you use and understand the functions in the
-    // family-tree.utils file!!!
+    this.childrenControl.push(
+      createFamilyTreeControl({ name: '', age: 0, children: [] })
+    );
   }
-
+  removeChildren(i: number) {
+    this.childrenControl.removeAt(i);
+  }
   ngOnDestroy() {
     this._destroying$.next();
   }

@@ -1,22 +1,31 @@
-<form>
-  <fieldset>
-    <label>Name</label>
-    <input type="text" />
-  </fieldset>
-  <fieldset>
-    <label>Age</label>
-    <input type="number" />
-  </fieldset>
-  <fieldset>
-    <label>Children</label>
-    <button (click)="addChild()" class="add-child">
-      Add Child to [[ node's name or 'Unnamed Parent' ]]
-    </button>
-    <div class="child">
-      <!-- <forms-course-lesson3-completed-family-tree-form></forms-course-lesson3-completed-family-tree-form> -->
-      <button class="remove-child">
-        Remove [[ child node's name or 'Unnamed Offspring' ]]
+<ng-container *ngIf="form">
+  <form [formGroup]="form">
+    <fieldset>
+      <label>Name</label>
+      <input type="text" formControlName="name" />
+    </fieldset>
+    <fieldset>
+      <label>Age</label>
+      <input type="number" formControlName="age" />
+    </fieldset>
+    <fieldset>
+      <label>Children</label>
+      <button (click)="addChild()" class="add-child">
+        Add Child to {{ this.nameControl?.value || 'Unnamed Parent' }}
       </button>
-    </div>
-  </fieldset>
-</form>
+      <div formArrayName="children">
+        <div
+          *ngFor="let child of childrenControl.controls; let i = index"
+          class="child"
+        >
+          <forms-course-family-tree-form
+          [formControlName]="i"
+          ></forms-course-family-tree-form>
+          <button class="remove-child" (click)="removeChildren(i)">
+            Remove {{ child.get('name')?.value || 'Unnamed Offspring' }}
+          </button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</ng-container>
