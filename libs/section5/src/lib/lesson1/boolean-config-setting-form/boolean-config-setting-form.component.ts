@@ -3,14 +3,14 @@ import {
   Input,
   OnChanges,
   OnDestroy,
-  SimpleChanges
+  SimpleChanges,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
-  NG_VALUE_ACCESSOR
+  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { Observable, ReplaySubject, Subject, combineLatest } from 'rxjs';
+import { Observable, ReplaySubject, Subject, combineLatest, of } from 'rxjs';
 import { createBooleanConfigSettingControl } from '../../config-settings.utils';
 import { startWith, map, takeUntil, tap } from 'rxjs/operators';
 
@@ -22,12 +22,13 @@ import { startWith, map, takeUntil, tap } from 'rxjs/operators';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: BooleanConfigSettingFormComponent,
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class BooleanConfigSettingFormComponent
-  implements ControlValueAccessor, OnDestroy, OnChanges {
+  implements ControlValueAccessor, OnDestroy, OnChanges
+{
   @Input() name: string;
   @Input() storeValue: boolean;
   private _storeValue$ = new ReplaySubject<boolean>(1);
@@ -36,14 +37,34 @@ export class BooleanConfigSettingFormComponent
   _destroying$ = new Subject<void>();
   private _onTouched;
 
+  
   writeValue(v: boolean) {
     // add your implementation here!
     // make sure to use and know what's going on in config-settings.utils.ts!!
     // also make sure to create the formValueMatchesStoreValue in this method!
+    if (this.control) {
+      this.control.setValue(v);
+      this.formValueMatchesStoreValue$ = of(this.isEqualToStoreValue(v));
+    } else {
+      this.control = createBooleanConfigSettingControl(v);
+    }
+  }
+
+  private isEqualToStoreValue(v: boolean): boolean {
+    return v === this.storeValue;
   }
 
   registerOnChange(fn) {
     // add your implementation here!
+    this.control.valueChanges
+      .pipe(
+        takeUntil(this._destroying$),
+        startWith(this.control.value),
+        tap(fn)
+      )
+      .subscribe((v) => {
+        this.formValueMatchesStoreValue$ = of(this.isEqualToStoreValue(v));
+      });
   }
 
   registerOnTouched(fn) {
