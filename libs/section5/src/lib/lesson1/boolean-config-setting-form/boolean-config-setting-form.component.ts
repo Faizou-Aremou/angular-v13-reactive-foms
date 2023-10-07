@@ -37,17 +37,19 @@ export class BooleanConfigSettingFormComponent
   _destroying$ = new Subject<void>();
   private _onTouched;
 
-  
   writeValue(v: boolean) {
     // add your implementation here!
     // make sure to use and know what's going on in config-settings.utils.ts!!
     // also make sure to create the formValueMatchesStoreValue in this method!
     if (this.control) {
       this.control.setValue(v);
-      this.formValueMatchesStoreValue$ = of(this.isEqualToStoreValue(v));
     } else {
       this.control = createBooleanConfigSettingControl(v);
     }
+    this.formValueMatchesStoreValue$ = combineLatest([
+      this.control.valueChanges.pipe(startWith(this.control.value)),
+      this._storeValue$,
+    ]).pipe(map(([value, storedValue]) => value === storedValue));
   }
 
   private isEqualToStoreValue(v: boolean): boolean {
@@ -62,9 +64,7 @@ export class BooleanConfigSettingFormComponent
         startWith(this.control.value),
         tap(fn)
       )
-      .subscribe((v) => {
-        this.formValueMatchesStoreValue$ = of(this.isEqualToStoreValue(v));
-      });
+      .subscribe();
   }
 
   registerOnTouched(fn) {

@@ -3,14 +3,14 @@ import {
   Input,
   OnChanges,
   OnDestroy,
-  SimpleChanges
+  SimpleChanges,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
-  NG_VALUE_ACCESSOR
+  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { Observable, ReplaySubject, Subject, combineLatest } from 'rxjs';
+import { Observable, ReplaySubject, Subject, combineLatest, of } from 'rxjs';
 import { createNumberConfigSettingControl } from '../../config-settings.utils';
 import { startWith, map, takeUntil, tap } from 'rxjs/operators';
 
@@ -22,14 +22,20 @@ import { startWith, map, takeUntil, tap } from 'rxjs/operators';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: NumberConfigSettingFormComponent,
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class NumberConfigSettingFormComponent
-  implements OnDestroy, ControlValueAccessor, OnChanges {
+  implements OnDestroy, ControlValueAccessor
+{
   @Input() name: string;
-  @Input() storeValue: number;
+  @Input() set storeValue(value: number | undefined) {
+    if (value !== undefined) {
+      console.log(value);
+      this._storeValue$.next(value);
+    }
+  }
   private _storeValue$ = new ReplaySubject<number>(1);
   formValueMatchesStoreValue$: Observable<boolean>;
   control: FormControl;
@@ -38,10 +44,25 @@ export class NumberConfigSettingFormComponent
 
   writeValue(v: number) {
     // add your implementation here!
+    if (!this.control) {
+      this.control = createNumberConfigSettingControl(v);
+    } else {
+      this.control.setValue(v);
+    }
+
+    this.formValueMatchesStoreValue$ = combineLatest([
+      this.control.valueChanges.pipe(startWith(this.control.value)),
+      this._storeValue$,
+    ]).pipe(
+      tap(([value, storeValue]) => console.log('emit',storeValue)),
+      map(([value, storeValue]) => value === storeValue)
+    );
   }
 
   registerOnChange(fn) {
-    // add your implementation here!
+    this.control.valueChanges
+      .pipe(takeUntil(this._destroying$), startWith(this.control.value))
+      .subscribe(fn);
   }
 
   registerOnTouched(fn) {
@@ -54,12 +75,6 @@ export class NumberConfigSettingFormComponent
 
   setDisabledState(isDisabled: boolean) {
     isDisabled ? this.control.disable() : this.control.enable();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.storeValue) {
-      this._storeValue$.next(this.storeValue);
-    }
   }
 
   ngOnDestroy() {
