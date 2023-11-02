@@ -60,15 +60,15 @@ import { FamilyTreeFormComponent } from './lesson3/family-tree-form/family-tree-
           next: 'section-5/lesson-1'
         }
       },
-      // {
-      //   path: 'lesson-4',
-      //   component: Lesson4ShellComponent,
-      //   data: {
-      //     navText: 'Lesson 4: Handling Validity',
-      //     prev: 'section-4/lesson-3',
-      //     next: 'section-5/lesson-1'
-      //   }
-      // },
+      {
+        path: 'lesson-4',
+        component: Lesson4ShellComponent,
+        data: {
+          navText: 'Lesson 4: Handling Validity',
+          prev: 'section-4/lesson-3',
+          next: 'section-5/lesson-1'
+        }
+      },
       { path: '**', redirectTo: 'lesson-1' }
     ])
   ],

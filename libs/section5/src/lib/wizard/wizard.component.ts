@@ -4,9 +4,9 @@ import {
   ConfigSettings,
   configSettingsSelector,
   savePendingSelector,
-  submitSaveRequest
+  submitSaveRequest,
 } from '../+state';
-import { Observable, Subject, combineLatest, of } from 'rxjs';
+import { Observable, Subject, combineLatest, lastValueFrom, of } from 'rxjs';
 import { Store, select } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -16,7 +16,9 @@ import {
   map,
   shareReplay,
   take,
-  switchMap
+  switchMap,
+  publishReplay,
+  refCount,
 } from 'rxjs/operators';
 import { createConfigSettingFormControl } from '../wizard-form.utils';
 import * as deepEqual from 'deep-equal';
@@ -26,7 +28,7 @@ import { CompletedConfimationDialogComponent } from '../completed/completed-conf
 @Component({
   selector: 'forms-course-wizard',
   templateUrl: './wizard.component.html',
-  styleUrls: ['./wizard.component.css']
+  styleUrls: ['./wizard.component.css'],
 })
 export class WizardComponent implements OnDestroy {
   control: FormControl;
@@ -46,20 +48,35 @@ export class WizardComponent implements OnDestroy {
     this.configSettingsFromStore$
       .pipe(
         takeUntil(this._destroying$),
-        tap(configSettings => {
+        tap((configSettings) => {
           // create your form here in lesson 3
+          if (!this.control) {
+            this.control = createConfigSettingFormControl(configSettings);
+            this._formIsValid$ = this.control.statusChanges.pipe(
+              startWith(this.control.status),
+              map(status => status === 'VALID')
+            );
+          } else {
+            this.control.setValue(configSettings);
+          }
         })
       )
       .subscribe();
-    // this._formIsValid$ = this.control.statusChanges.pipe(
-    //   startWith(this.control.status),
-    //   map(status => status === 'VALID')
-    // );
-    this._formHasChanges$ = of(true); // implement your change detection here!!! (in lesson 3)
+    this._formHasChanges$ = combineLatest([
+      this.control.valueChanges.pipe(startWith(this.control.value)),
+      this.configSettingsFromStore$
+    ]).pipe(
+      map(
+        ([formValue, storeConfigSettingValue]) =>
+          !deepEqual(formValue, storeConfigSettingValue)
+      ),
+      publishReplay(1),
+      refCount()
+    ); // implement your change detection here!!! (in lesson 3)
     this.submitButtonDisabled$ = combineLatest([
       this._formIsValid$,
       this._formHasChanges$,
-      this.savePending$
+      this.savePending$,
     ]).pipe(
       map(
         ([formIsValid, formHasChanges, savePending]) =>
@@ -67,24 +84,27 @@ export class WizardComponent implements OnDestroy {
       )
     );
     this.discardChangesButtonDisabled$ = this._formHasChanges$.pipe(
-      map(hasChanges => !hasChanges)
+      map((hasChanges) => !hasChanges)
     );
-    // this.savePending$
-    //   .pipe(
-    //     takeUntil(this._destroying$),
-    //     tap(savePending =>
-    //       savePending ? this.control.disable() : this.control.enable()
-    //     )
-    //   )
-    //   .subscribe();
+    this.savePending$
+      .pipe(
+        takeUntil(this._destroying$),
+        tap(savePending =>
+          savePending ? this.control.disable() : this.control.enable()
+        )
+      )
+      .subscribe();
   }
 
   confirmSave() {
     // add your implementation here in lesson 5
   }
 
-  discardChanges() {
+  async discardChanges() {
     // add your implementation here in lesson 3
+    const configSettings = await lastValueFrom(this.configSettingsFromStore$
+    .pipe(take(1)));
+    this.control.reset();
   }
 
   canDeactivate(): Observable<boolean> {
