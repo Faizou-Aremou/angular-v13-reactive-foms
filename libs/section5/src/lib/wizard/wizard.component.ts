@@ -24,6 +24,7 @@ import { createConfigSettingFormControl } from '../wizard-form.utils';
 import * as deepEqual from 'deep-equal';
 import { CompletedDiscardChangesDialogComponent } from '../completed/completed-discard-changes-dialog/completed-discard-changes-dialog.component';
 import { CompletedConfimationDialogComponent } from '../completed/completed-confimation-dialog/completed-confimation-dialog.component';
+import { flatten } from 'ramda';
 
 @Component({
   selector: 'forms-course-wizard',
@@ -54,7 +55,7 @@ export class WizardComponent implements OnDestroy {
             this.control = createConfigSettingFormControl(configSettings);
             this._formIsValid$ = this.control.statusChanges.pipe(
               startWith(this.control.status),
-              map(status => status === 'VALID')
+              map((status) => status === 'VALID')
             );
           } else {
             this.control.setValue(configSettings);
@@ -64,7 +65,7 @@ export class WizardComponent implements OnDestroy {
       .subscribe();
     this._formHasChanges$ = combineLatest([
       this.control.valueChanges.pipe(startWith(this.control.value)),
-      this.configSettingsFromStore$
+      this.configSettingsFromStore$,
     ]).pipe(
       map(
         ([formValue, storeConfigSettingValue]) =>
@@ -89,27 +90,71 @@ export class WizardComponent implements OnDestroy {
     this.savePending$
       .pipe(
         takeUntil(this._destroying$),
-        tap(savePending =>
+        tap((savePending) =>
           savePending ? this.control.disable() : this.control.enable()
         )
       )
       .subscribe();
   }
 
-  confirmSave() {
+  async confirmSave(): Promise<void> {
     // add your implementation here in lesson 5
+    const hasChanged = await lastValueFrom(this._formHasChanges$.pipe(take(1)));
+    if (!hasChanged) {
+      return;
+    }
+    this.configSettingsFromStore$
+      .pipe(
+        take(1),
+        tap((configSettings) => {
+          const dialogRef = this.dialog.open(
+            CompletedConfimationDialogComponent,
+            {
+              data: flatten(Object.keys(this.control.value).map((key) => {
+                const replacedValue = configSettings[key];
+                const replacingValue = this.control.value[key];
+                return replacedValue !==  replacingValue?  [ {
+                  name: key,
+                  replacedValue,
+                  replacingValue,
+                }] : []
+              })),
+            }
+          );
+          dialogRef.afterClosed().pipe(
+            tap((configSetting) => {
+              this.store.dispatch(submitSaveRequest(configSetting));
+            })
+          );
+        })
+      )
+      .subscribe();
   }
 
   async discardChanges() {
     // add your implementation here in lesson 3
-    const configSettings = await lastValueFrom(this.configSettingsFromStore$
-    .pipe(take(1)));
-    this.control.reset();
+    const configSettings = await lastValueFrom(
+      this.configSettingsFromStore$.pipe(take(1))
+    );
+    this.control.reset(configSettings);
   }
 
   canDeactivate(): Observable<boolean> {
     // add your implmentation here in lesson 4
-    return of(true);
+    return this._formHasChanges$.pipe(
+      switchMap((hasChanged) => {
+        console.log('hasChanged', hasChanged);
+        if (!hasChanged) {
+          return of(true);
+        }
+        {
+          const dialogRef = this.dialog.open(
+            CompletedDiscardChangesDialogComponent
+          );
+          return dialogRef.afterClosed();
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
