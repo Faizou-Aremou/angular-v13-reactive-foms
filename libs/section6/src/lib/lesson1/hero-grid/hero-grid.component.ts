@@ -6,16 +6,23 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormGroup,
   NG_VALUE_ACCESSOR,
-  FormControl
+  FormControl,
 } from '@angular/forms';
 import { MatSort, Sort } from '@angular/material/sort';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import {
+  Observable,
+  ReplaySubject,
+  Subject,
+  startWith,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { Hero, HeroColumnFilters } from '../../+state/hero.utils';
 
 @Component({
@@ -23,11 +30,12 @@ import { Hero, HeroColumnFilters } from '../../+state/hero.utils';
   templateUrl: './hero-grid.component.html',
   styleUrls: ['./hero-grid.component.css'],
   providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: HeroGridComponent, multi: true }
-  ]
+    { provide: NG_VALUE_ACCESSOR, useExisting: HeroGridComponent, multi: true },
+  ],
 })
 export class HeroGridComponent
-  implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+  implements OnInit, OnChanges, OnDestroy, ControlValueAccessor
+{
   @ViewChild(MatSort, { static: true }) private _matSort: MatSort;
   @Output() sort: Observable<Sort>;
   @Input() heroes: Hero[] = [];
@@ -40,16 +48,23 @@ export class HeroGridComponent
 
   writeValue(v: HeroColumnFilters) {
     // create your own implementation here
-    this.form = new FormGroup(
-      this.columns.reduce(
-        (acc, columnName) => ({ ...acc, [columnName]: new FormControl('') }),
-        {}
-      )
-    );
+    if (!this.form) {
+      this.form = new FormGroup(
+        this.columns.reduce(
+          (acc, columnName) => ({ ...acc, [columnName]: new FormControl('') }),
+          {}
+        )
+      );
+    } else {
+      this.form.setValue(v);
+    }
   }
 
   registerOnChange(fn) {
     // create your own implementation here
+    this.form.valueChanges
+      .pipe(startWith(this.form.value), takeUntil(this._destroying), tap(fn))
+      .subscribe();
   }
 
   registerOnTouched(fn) {}

@@ -3,15 +3,15 @@ import {
   Input,
   OnChanges,
   OnDestroy,
-  SimpleChanges
+  SimpleChanges,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
-  NG_VALUE_ACCESSOR
+  NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith, takeUntil, tap } from 'rxjs/operators';
 
 const createPaginationOptions = (
   currentPage: number,
@@ -44,12 +44,16 @@ const createPaginationOptions = (
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: PaginationFormComponent,
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
+/**
+ * Pagination is form Component
+ */
 export class PaginationFormComponent
-  implements ControlValueAccessor, OnDestroy, OnChanges {
+  implements ControlValueAccessor, OnDestroy, OnChanges
+{
   @Input() totalPages = 1;
   private _totalPages$ = new ReplaySubject<number>(1);
   control: FormControl;
@@ -63,18 +67,32 @@ export class PaginationFormComponent
   writeValue(v: number) {
     // create your own implementation here
     // make sure to create all required Observables here!
+    if (!this.control) {
+      this.control = new FormControl(v);
+      this.paginationOptions$ = combineLatest([
+        this.control.valueChanges.pipe(startWith(this.control.value)),
+        this._totalPages$,
+      ]).pipe(
+        map(([currentPage, totalPages]) =>
+          createPaginationOptions(currentPage, totalPages)
+        )
+      );
+      this._setFirstAndLastObservables();
+    } else {
+      this.control.setValue(v);
+    }
   }
 
   private _setFirstAndLastObservables() {
     this.showFirst$ = this.paginationOptions$.pipe(
-      map(options => options.length > 1 && !options.includes(1))
+      map((options) => options.length > 1 && !options.includes(1))
     );
     this.showFirstElipsis$ = this.paginationOptions$.pipe(
-      map(options => options.length > 2 && !options.includes(2))
+      map((options) => options.length > 2 && !options.includes(2))
     );
     this.showLast$ = combineLatest([
       this.paginationOptions$,
-      this._totalPages$
+      this._totalPages$,
     ]).pipe(
       map(
         ([options, totalPages]) =>
@@ -83,7 +101,7 @@ export class PaginationFormComponent
     );
     this.showLastElipsis$ = combineLatest([
       this.paginationOptions$,
-      this._totalPages$
+      this._totalPages$,
     ]).pipe(
       map(
         ([options, totalPages]) =>
@@ -93,7 +111,9 @@ export class PaginationFormComponent
   }
 
   registerOnChange(fn) {
-    // create your own implemantation here!
+    this.control.valueChanges
+      .pipe(startWith(this.control.value), takeUntil(this._destroying), tap(fn))
+      .subscribe();
   }
 
   registerOnTouched(fn) {}

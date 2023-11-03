@@ -20,6 +20,7 @@ export class HeroService {
   heroes(
     params: HeroColumnFilters & HeroTableFormValue & Sort
   ): Observable<{ heroes: Hero[]; matchingResults: number }> {
+    console.log("params", params.direction )
     const filteredHeroes = sortHeroes(initialHeroes, params)
       .filter(hero => heroGlobalFilter(hero, params.filter))
       .filter(hero => heroColumnFilter(hero, params));

@@ -1,4 +1,4 @@
-<!-- <form [formGroup]="form">
+<form [formGroup]="form">
   <mat-form-field appearance="outline" class="filter">
     <mat-label>Filter</mat-label>
     <input matInput formControlName="filter" />
@@ -16,10 +16,9 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-
-  <forms-course-lesson1-completed-pagination-form
+  <forms-course-pagination-form
     [totalPages]="totalPages$ | async"
     formControlName="currentPage"
     class="paginator"
-  ></forms-course-lesson1-completed-pagination-form>
-</form> -->
+  ></forms-course-pagination-form>
+</form>
